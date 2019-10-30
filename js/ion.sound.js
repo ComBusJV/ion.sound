@@ -516,17 +516,32 @@
             if (!this.multiplay && this.playing) {
                 return;
             }
+            
+            if(audio.resume && typeof audio.resume === "function"){
+                audio.resume().then(function(){
+                    this.gain = audio.createGain();
+                    this.source = audio.createBufferSource();
+                    this.source.buffer = this.buffer;
+                    this.source.connect(this.gain);
+                    this.gain.connect(audio.destination);
+                    this.gain.gain.value = this.volume;
 
-            this.gain = audio.createGain();
-            this.source = audio.createBufferSource();
-            this.source.buffer = this.buffer;
-            this.source.connect(this.gain);
-            this.gain.connect(audio.destination);
-            this.gain.gain.value = this.volume;
+                    this.source.onended = this.ended.bind(this);
 
-            this.source.onended = this.ended.bind(this);
+                    this._play();
+                });
+            }else{
+                this.gain = audio.createGain();
+                this.source = audio.createBufferSource();
+                this.source.buffer = this.buffer;
+                this.source.connect(this.gain);
+                this.gain.connect(audio.destination);
+                this.gain.gain.value = this.volume;
 
-            this._play();
+                this.source.onended = this.ended.bind(this);
+
+                this._play();      
+            }
         },
 
         _play: function () {
